@@ -1,0 +1,49 @@
+name: part5 Build and Push to ECR
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: studentportal
+  IMAGE_TAG: ${{ github.sha }}
+  PATH_TO_BUILD: ./src  #./class4/src
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::216989097838:role/eks-github-actions-build-role # copied d arn from "eks-github-actions-build-role" role in IAM
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          echo "Building the Docker image... ${{ steps.login-ecr.outputs.registry }}"
+          cd ${{ env.PATH_TO_BUILD }}
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+
+      - name: Push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
