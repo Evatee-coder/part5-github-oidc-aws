@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS EKS Infrastructure Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #2c3e50;
+        }
+        
+        .tab:hover {
+            background: #d5dbdb;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .diagram-container {
+            display: none;
+        }
+        
+        .diagram-container.active {
+            display: block;
+        }
+        
+        svg {
+            width: 100%;
+            height: auto;
+        }
+        
+        .aws-region {
+            fill: #fff3cd;
+            stroke: #ff9900;
+            stroke-width: 3;
+            rx: 10;
+        }
+        
+        .vpc {
+            fill: #e3f2fd;
+            stroke: #2196F3;
+            stroke-width: 2.5;
+            rx: 8;
+        }
+        
+        .subnet-public {
+            fill: #c8e6c9;
+            stroke: #4CAF50;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .subnet-private {
+            fill: #ffccbc;
+            stroke: #FF5722;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .subnet-rds {
+            fill: #f8bbd0;
+            stroke: #E91E63;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .eks-cluster {
+            fill: #fff9c4;
+            stroke: #FFC107;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .node-group {
+            fill: #ffecb3;
+            stroke: #FFA000;
+            stroke-width: 1.5;
+            rx: 4;
+        }
+        
+        .pod {
+            fill: #b3e5fc;
+            stroke: #0288D1;
+            stroke-width: 1.5;
+            rx: 4;
+        }
+        
+        .service {
+            fill: #c5cae9;
+            stroke: #3F51B5;
+            stroke-width: 1.5;
+            rx: 4;
+        }
+        
+        .alb {
+            fill: #f48fb1;
+            stroke: #C2185B;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .rds {
+            fill: #ce93d8;
+            stroke: #8E24AA;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .security-group {
+            fill: none;
+            stroke: #e74c3c;
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            rx: 6;
+        }
+        
+        .nat-gateway {
+            fill: #a5d6a7;
+            stroke: #388E3C;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .igw {
+            fill: #90caf9;
+            stroke: #1976D2;
+            stroke-width: 2;
+            rx: 6;
+        }
+        
+        .kms {
+            fill: #ffab91;
+            stroke: #E64A19;
+            stroke-width: 2;
+            rx: 4;
+        }
+        
+        .secrets-manager {
+            fill: #ef9a9a;
+            stroke: #C62828;
+            stroke-width: 2;
+            rx: 4;
+        }
+        
+        .label {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            fill: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .label-small {
+            font-size: 11px;
+            fill: #34495e;
+        }
+        
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            fill: #2c3e50;
+        }
+        
+        .connection {
+            stroke: #95a5a6;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+        
+        .connection-secure {
+            stroke: #27ae60;
+            stroke-width: 2.5;
+            fill: none;
+            marker-end: url(#arrowhead-secure);
+        }
+        
+        .connection-data {
+            stroke: #3498db;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5,3;
+            marker-end: url(#arrowhead-data);
+        }
+        
+        .icon {
+            font-size: 20px;
+        }
+        
+        .legend {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .legend-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .legend-box {
+            display: inline-block;
+            width: 20px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ AWS EKS Infrastructure Architecture</h1>
+        <p class="subtitle">Student Portal Application - Complete Infrastructure Overview</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showDiagram('overview')">📊 Full Architecture</button>
+            <button class="tab" onclick="showDiagram('network')">🌐 Network Topology</button>
+            <button class="tab" onclick="showDiagram('security')">🔒 Security Groups</button>
+            <button class="tab" onclick="showDiagram('dataflow')">🔄 Data Flow</button>
+        </div>
+        
+        <!-- Full Architecture Diagram -->
+        <div id="overview" class="diagram-container active">
+            <svg viewBox="0 0 1300 1100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#95a5a6" />
+                    </marker>
+                    <marker id="arrowhead-secure" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#27ae60" />
+                    </marker>
+                    <marker id="arrowhead-data" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#3498db" />
+                    </marker>
+                </defs>
+                
+                <!-- AWS Region -->
+                <rect class="aws-region" x="10" y="10" width="1280" height="1080" />
+                <text class="title" x="30" y="40">🌎 AWS Region: us-east-1</text>
+                
+                <!-- VPC -->
+                <rect class="vpc" x="30" y="60" width="1240" height="1010" />
+                <text class="title" x="50" y="90">🏢 VPC: 10.0.0.0/16</text>
+                
+                <!-- Internet Gateway -->
+                <rect class="igw" x="570" y="110" width="160" height="60" />
+                <text class="label" x="600" y="135">🌐 Internet Gateway</text>
+                <text class="label-small" x="610" y="155">(Public Access)</text>
+                
+                <!-- Availability Zone A -->
+                <g id="az-a">
+                    <!-- Public Subnet A -->
+                    <rect class="subnet-public" x="60" y="200" width="280" height="340" />
+                    <text class="label" x="80" y="225">☁️ Public Subnet A</text>
+                    <text class="label-small" x="80" y="242">10.0.1.0/24 (us-east-1a)</text>
+                    
+                    <!-- NAT Gateway -->
+                    <rect class="nat-gateway" x="80" y="260" width="150" height="60" />
+                    <text class="label" x="100" y="285">🔀 NAT Gateway</text>
+                    <text class="label-small" x="100" y="305">(Single)</text>
+                    
+                    <!-- ALB (in public subnet) -->
+                    <rect class="alb" x="80" y="340" width="240" height="80" />
+                    <text class="label" x="120" y="365">⚖️ Application Load Balancer</text>
+                    <text class="label-small" x="120" y="382">Internet-facing</text>
+                    <text class="label-small" x="120" y="397">eks.eva-tee.com</text>
+                    <text class="label-small" x="120" y="412">HTTPS:443 / HTTP:80</text>
+                    
+                    <!-- Private Subnet A -->
+                    <rect class="subnet-private" x="60" y="560" width="280" height="360" />
+                    <text class="label" x="80" y="585">🔐 Private Subnet A</text>
+                    <text class="label-small" x="80" y="602">10.0.4.0/24 (us-east-1a)</text>
+                    
+                    <!-- EKS Nodes in Private A -->
+                    <rect class="node-group" x="80" y="620" width="240" height="140" />
+                    <text class="label" x="100" y="645">🖥️ EKS Managed Node</text>
+                    <text class="label-small" x="100" y="662">t2.medium</text>
+                    
+                    <!-- Pods -->
+                    <rect class="pod" x="100" y="680" width="200" height="70" />
+                    <text class="label" x="120" y="700">📦 Pod 1</text>
+                    <text class="label-small" x="120" y="715">student-portal</text>
+                    <text class="label-small" x="120" y="730">Container: Flask</text>
+                    <text class="label-small" x="120" y="745">Port: 8000</text>
+                    
+                    <!-- RDS Subnet A -->
+                    <rect class="subnet-rds" x="80" y="780" width="240" height="120" />
+                    <text class="label" x="100" y="805">💾 RDS Subnet A</text>
+                    <text class="label-small" x="100" y="822">10.0.7.0/24 (us-east-1a)</text>
+                </g>
+                
+                <!-- Availability Zone B -->
+                <g id="az-b">
+                    <!-- Public Subnet B -->
+                    <rect class="subnet-public" x="370" y="200" width="280" height="340" />
+                    <text class="label" x="390" y="225">☁️ Public Subnet B</text>
+                    <text class="label-small" x="390" y="242">10.0.2.0/24 (us-east-1b)</text>
+                    
+                    <!-- Private Subnet B -->
+                    <rect class="subnet-private" x="370" y="560" width="280" height="360" />
+                    <text class="label" x="390" y="585">🔐 Private Subnet B</text>
+                    <text class="label-small" x="390" y="602">10.0.5.0/24 (us-east-1b)</text>
+                    
+                    <!-- EKS Nodes in Private B -->
+                    <rect class="node-group" x="390" y="620" width="240" height="140" />
+                    <text class="label" x="410" y="645">🖥️ EKS Managed Node</text>
+                    <text class="label-small" x="410" y="662">t2.medium</text>
+                    
+                    <!-- Pods -->
+                    <rect class="pod" x="410" y="680" width="200" height="70" />
+                    <text class="label" x="430" y="700">📦 Pod 2</text>
+                    <text class="label-small" x="430" y="715">student-portal</text>
+                    <text class="label-small" x="430" y="730">Container: Flask</text>
+                    <text class="label-small" x="430" y="745">Port: 8000</text>
+                    
+                    <!-- RDS Subnet B -->
+                    <rect class="subnet-rds" x="390" y="780" width="240" height="120" />
+                    <text class="label" x="410" y="805">💾 RDS Subnet B</text>
+                    <text class="label-small" x="410" y="822">10.0.8.0/24 (us-east-1b)</text>
+                    
+                    <!-- RDS Instance -->
+                    <rect class="rds" x="410" y="840" width="200" height="50" />
+                    <text class="label" x="440" y="862">🗄️ RDS PostgreSQL</text>
+                    <text class="label-small" x="440" y="877">db.t3.micro (14.15)</text>
+                </g>
+                
+                <!-- Availability Zone C -->
+                <g id="az-c">
+                    <!-- Public Subnet C -->
+                    <rect class="subnet-public" x="680" y="200" width="280" height="340" />
+                    <text class="label" x="700" y="225">☁️ Public Subnet C</text>
+                    <text class="label-small" x="700" y="242">10.0.3.0/24 (us-east-1c)</text>
+                    
+                    <!-- Private Subnet C -->
+                    <rect class="subnet-private" x="680" y="560" width="280" height="360" />
+                    <text class="label" x="700" y="585">🔐 Private Subnet C</text>
+                    <text class="label-small" x="700" y="602">10.0.6.0/24 (us-east-1c)</text>
+                    
+                    <!-- Pods -->
+                    <rect class="pod" x="710" y="680" width="200" height="70" />
+                    <text class="label" x="730" y="700">📦 Pod 3</text>
+                    <text class="label-small" x="730" y="715">student-portal</text>
+                    <text class="label-small" x="730" y="730">Container: Flask</text>
+                    <text class="label-small" x="730" y="745">Port: 8000</text>
+                </g>
+                
+                <!-- EKS Control Plane -->
+                <rect class="eks-cluster" x="990" y="200" width="260" height="200" />
+                <text class="label" x="1010" y="225">☸️ EKS Control Plane</text>
+                <text class="label-small" x="1010" y="242">eks-cluster-part5-3rdjan</text>
+                <text class="label-small" x="1010" y="257">Kubernetes v1.31</text>
+                
+                <!-- EKS Addons -->
+                <rect class="service" x="1010" y="275" width="220" height="30" />
+                <text class="label-small" x="1020" y="294">Add-ons: CoreDNS, kube-proxy, VPC-CNI</text>
+                
+                <!-- Kubernetes Service -->
+                <rect class="service" x="1010" y="315" width="220" height="50" />
+                <text class="label" x="1020" y="335">🔌 K8s Service</text>
+                <text class="label-small" x="1020" y="350">student-portal (ClusterIP)</text>
+                <text class="label-small" x="1020" y="365">Port: 8080 → 8000</text>
+                
+                <!-- AWS Load Balancer Controller -->
+                <rect class="service" x="990" y="420" width="260" height="80" />
+                <text class="label" x="1010" y="445">⚙️ AWS LB Controller</text>
+                <text class="label-small" x="1010" y="460">ServiceAccount + IAM Role</text>
+                <text class="label-small" x="1010" y="475">AWSLoadBalancerControllerRole</text>
+                <text class="label-small" x="1010" y="490">Manages ALB via Ingress</text>
+                
+                <!-- Security & Secrets -->
+                <rect class="kms" x="990" y="540" width="260" height="60" />
+                <text class="label" x="1010" y="565">🔑 KMS Key</text>
+                <text class="label-small" x="1010" y="580">Encrypts RDS + Secrets</text>
+                <text class="label-small" x="1010" y="595">7-day deletion window</text>
+                
+                <rect class="secrets-manager" x="990" y="620" width="260" height="80" />
+                <text class="label" x="1010" y="645">🔐 AWS Secrets Manager</text>
+                <text class="label-small" x="1010" y="660">Secret: db/student-portal</text>
+                <text class="label-small" x="1010" y="675">DB Connection String</text>
+                <text class="label-small" x="1010" y="690">→ K8s Secret (db-secret)</text>
+                
+                <!-- Connections -->
+                <!-- Internet to IGW -->
+                <path class="connection" d="M 650 80 L 650 110" />
+                
+                <!-- IGW to ALB -->
+                <path class="connection" d="M 650 170 L 200 340" />
+                
+                <!-- ALB to Pods -->
+                <path class="connection-secure" d="M 200 420 L 200 680" />
+                <path class="connection-secure" d="M 200 420 L 510 680" />
+                <path class="connection-secure" d="M 200 420 L 810 680" />
+                
+                <!-- NAT to Internet -->
+                <path class="connection" d="M 155 260 L 600 170" />
+                
+                <!-- Pods to RDS (through private network) -->
+                <path class="connection-data" d="M 200 750 L 510 840" />
+                <path class="connection-data" d="M 510 750 L 510 840" />
+                <path class="connection-data" d="M 810 750 L 510 840" />
+                
+                <!-- EKS Control to Nodes -->
+                <path class="connection" d="M 990 300 L 320 680" />
+                <path class="connection" d="M 990 300 L 630 680" />
+                
+                <!-- Secrets to Pods -->
+                <path class="connection-secure" d="M 990 660 L 300 720" />
+                
+                <!-- External User -->
+                <text class="title" x="580" y="25">👤 Internet Users</text>
+                <path class="connection" d="M 650 30 L 650 80" />
+            </svg>
+            
+            <div class="legend">
+                <div class="legend-title">📋 Legend</div>
+                <div class="legend-item">
+                    <span class="legend-box" style="background: #c8e6c9; border: 2px solid #4CAF50;"></span>
+                    Public Subnet
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box" style="background: #ffccbc; border: 2px solid #FF5722;"></span>
+                    Private Subnet
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box" style="background: #f8bbd0; border: 2px solid #E91E63;"></span>
+                    RDS Subnet
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box" style="background: #fff9c4; border: 2px solid #FFC107;"></span>
+                    EKS Components
+                </div>
+                <div class="legend-item">
+                    <span class="legend-box" style="background: #b3e5fc; border: 2px solid #0288D1;"></span>
+                    Pods
+                </div>
+            </div>
+        </div>
+        
+        <!-- Network Topology Diagram -->
+        <div id="network" class="diagram-container">
+            <svg viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#3498db" />
+                    </marker>
+                </defs>
+                
+                <!-- Title -->
+                <text class="title" x="450" y="30">🌐 Network Topology & Routing</text>
+                
+                <!-- VPC -->
+                <rect class="vpc" x="50" y="60" width="1100" height="800" />
+                <text class="label" x="70" y="90">VPC: 10.0.0.0/16</text>
+                
+                <!-- Internet Gateway -->
+                <rect class="igw" x="500" y="90" width="180" height="60" />
+                <text class="label" x="530" y="120">Internet Gateway</text>
+                
+                <!-- Route Tables -->
+                <rect x="100" y="180" width="300" height="100" fill="#e8f5e9" stroke="#4CAF50" stroke-width="2" rx="6" />
+                <text class="label" x="120" y="210">📊 Public Route Table</text>
+                <text class="label-small" x="120" y="230">• 0.0.0.0/0 → IGW</text>
+                <text class="label-small" x="120" y="250">• 10.0.0.0/16 → Local</text>
+                <text class="label-small" x="120" y="270">Associated: Public Subnets A,B,C</text>
+                
+                <rect x="780" y="180" width="340" height="100" fill="#ffebee" stroke="#FF5722" stroke-width="2" rx="6" />
+                <text class="label" x="800" y="210">📊 Private Route Table</text>
+                <text class="label-small" x="800" y="230">• 0.0.0.0/0 → NAT Gateway</text>
+                <text class="label-small" x="800" y="250">• 10.0.0.0/16 → Local</text>
+                <text class="label-small" x="800" y="270">Associated: Private Subnets A,B,C + RDS Subnets</text>
+                
+                <!-- Subnet Groups -->
+                <rect class="subnet-public" x="100" y="320" width="300" height="220" />
+                <text class="label" x="120" y="350">Public Subnets</text>
+                <rect x="120" y="370" width="260" height="45" fill="#a5d6a7" stroke="#388E3C" stroke-width="1" rx="4" />
+                <text class="label-small" x="130" y="395">Subnet A: 10.0.1.0/24 (AZ-a)</text>
+                <rect x="120" y="425" width="260" height="45" fill="#a5d6a7" stroke="#388E3C" stroke-width="1" rx="4" />
+                <text class="label-small" x="130" y="450">Subnet B: 10.0.2.0/24 (AZ-b)</text>
+                <rect x="120" y="480" width="260" height="45" fill="#a5d6a7" stroke="#388E3C" stroke-width="1" rx="4" />
+                <text class="label-small" x="130" y="505">Subnet C: 10.0.3.0/24 (AZ-c)</text>
+                
+                <rect class="subnet-private" x="450" y="320" width="300" height="220" />
+                <text class="label" x="470" y="350">Private Subnets (EKS Nodes)</text>
+                <rect x="470" y="370" width="260" height="45" fill="#ffab91" stroke="#E64A19" stroke-width="1" rx="4" />
+                <text class="label-small" x="480" y="395">Subnet A: 10.0.4.0/24 (AZ-a)</text>
+                <rect x="470" y="425" width="260" height="45" fill="#ffab91" stroke="#E64A19" stroke-width="1" rx="4" />
+                <text class="label-small" x="480" y="450">Subnet B: 10.0.5.0/24 (AZ-b)</text>
+                <rect x="470" y="480" width="260" height="45" fill="#ffab91" stroke="#E64A19" stroke-width="1" rx="4" />
+                <text class="label-small" x="480" y="505">Subnet C: 10.0.6.0/24 (AZ-c)</text>
+                
+                <rect class="subnet-rds" x="800" y="320" width="300" height="220" />
+                <text class="label" x="820" y="350">RDS Database Subnets</text>
+                <rect x="820" y="370" width="260" height="45" fill="#f48fb1" stroke="#C2185B" stroke-width="1" rx="4" />
+                <text class="label-small" x="830" y="395">Subnet 1: 10.0.7.0/24 (AZ-a)</text>
+                <rect x="820" y="425" width="260" height="45" fill="#f48fb1" stroke="#C2185B" stroke-width="1" rx="4" />
+                <text class="label-small" x="830" y="450">Subnet 2: 10.0.8.0/24 (AZ-b)</text>
+                <text class="label-small" x="820" y="495">DB Subnet Group:</text>
+                <text class="label-small" x="820" y="512">student-portal-db-subnet-group</text>
+                
+                <!-- NAT Gateway -->
+                <rect class="nat-gateway" x="100" y="580" width="200" height="70" />
+                <text class="label" x="120" y="610">NAT Gateway</text>
+                <text class="label-small" x="120" y="630">In Public Subnet A</text>
+                <text class="label-small" x="120" y="645">Elastic IP attached</text>
+                
+                <!-- Network Flow Info -->
+                <rect x="100" y="690" width="1000" height="150" fill="#f5f5f5" stroke="#9e9e9e" stroke-width="2" rx="6" />
+                <text class="label" x="120" y="720">🔄 Network Traffic Flow:</text>
+                <text class="label-small" x="140" y="745">1. Internet → IGW → Public Subnets (ALB receives HTTPS traffic)</text>
+                <text class="label-small" x="140" y="765">2. ALB → Private Subnets (forwards to EKS pods on ClusterIP service)</text>
+                <text class="label-small" x="140" y="785">3. EKS Pods → RDS Subnets (database queries via private network)</text>
+                <text class="label-small" x="140" y="805">4. Private Subnets → NAT Gateway → IGW → Internet (outbound: ECR image pulls, updates)</text>
+                <text class="label-small" x="140" y="825">5. EKS Control Plane ↔ Worker Nodes (private ENIs in private subnets)</text>
+                
+                <!-- Connections -->
+                <path d="M 590 150 L 250 180" stroke="#3498db" stroke-width="2" fill="none" marker-end="url(#arrow2)" />
+                <path d="M 590 150 L 950 180" stroke="#3498db" stroke-width="2" fill="none" marker-end="url(#arrow2)" />
+                <path d="M 250 280 L 250 320" stroke="#4CAF50" stroke-width="2" fill="none" marker-end="url(#arrow2)" />
+                <path d="M 950 280 L 600 320" stroke="#FF5722" stroke-width="2" fill="none" marker-end="url(#arrow2)" />
+                <path d="M 950 280 L 950 320" stroke="#FF5722" stroke-width="2" fill="none" marker-end="url(#arrow2)" />
+                <path d="M 200 540 L 200 580" stroke="#388E3C" stroke-width="2" fill="none" marker-end="url(#arrow2)" />
+            </svg>
+        </div>
+        
+        <!-- Security Groups Diagram -->
+        <div id="security" class="diagram-container">
+            <svg viewBox="0 0 1200 1000" xmlns="http://www.w3.org/2000/svg">
+                <text class="title" x="420" y="30">🔒 Security Groups & Access Control</text>
+                
+                <!-- ALB Security Group -->
+                <rect class="security-group" x="100" y="80" width="450" height="200" />
+                <text class="label" x="120" y="110">🛡️ ALB Security Group (Implicit)</text>
+                <text class="label-small" x="120" y="130">Created by AWS Load Balancer Controller</text>
+                
+                <rect x="130" y="150" width="390" height="70" fill="#e8f5e9" stroke="#4CAF50" stroke-width="1" rx="4" />
+                <text class="label-small" x="150" y="175">INBOUND:</text>
+                <text class="label-small" x="150" y="195">• Port 80 (HTTP) from 0.0.0.0/0</text>
+                <text class="label-small" x="150" y="215">• Port 443 (HTTPS) from 0.0.0.0/0</text>
+                
+                <!-- EKS Node Security Group -->
+                <rect class="security-group" x="100" y="320" width="450" height="250" />
+                <text class="label" x="120" y="350">🛡️ EKS Node Security Group</text>
+                <text class="label-small" x="120" y="370">Auto-created by EKS module</text>
+                
+                <rect x="130" y="390" width="390" height="90" fill="#e8f5e9" stroke="#4CAF50" stroke-width="1" rx="4" />
+                <text class="label-small" x="150" y="415">INBOUND:</text>
+                <text class="label-small" x="150" y="435">• All traffic from EKS Control Plane SG</text>
+                <text class="label-small" x="150" y="455">• Port 8000 from ALB Security Group</text>
+                <text class="label-small" x="150" y="475">• All traffic from itself (node-to-node)</text>
+                
+                <rect x="130" y="490" width="390" height="60" fill="#ffebee" stroke="#f44336" stroke-width="1" rx="4" />
+                <text class="label-small" x="150" y="515">OUTBOUND:</text>
+                <text class="label-small" x="150" y="535">• All traffic to 0.0.0.0/0 (Internet via NAT)</text>
+                
+                <!-- RDS Security Group -->
+                <rect class="security-group" x="650" y="320" width="450" height="250" />
+                <text class="label" x="670" y="350">🛡️ RDS Security Group</text>
+                <text class="label-small" x="670" y="370">Name: dev-rds-sg</text>
+                
+                <rect x="680" y="390" width="390" height="80" fill="#e8f5e9" stroke="#4CAF50" stroke-width="1" rx="4" />
+                <text class="label-small" x="700" y="415">INBOUND:</text>
+                <text class="label-small" x="700" y="435">• Port 5432 (PostgreSQL) from 0.0.0.0/0</text>
+                <text class="label-small" x="700" y="455">⚠️ WARNING: Too permissive! Should be EKS Node SG only</text>
+                
+                <rect x="680" y="480" width="390" height="60" fill="#ffebee" stroke="#f44336" stroke-width="1" rx="4" />
+                <text class="label-small" x="700" y="505">OUTBOUND:</text>
+                <text class="label-small" x="700" y="525">• All traffic to 0.0.0.0/0</text>
+                
+                <!-- EKS Control Plane Security Group -->
+                <rect class="security-group" x="100" y="610" width="450" height="180" />
+                <text class="label" x="120" y="640">🛡️ EKS Control Plane Security Group</text>
+                <text class="label-small" x="120" y="660">Auto-created by EKS</text>
+                
+                <rect x="130" y="680" width="390" height="90" fill="#e8f5e9" stroke="#4CAF50" stroke-width="1" rx="4" />
+                <text class="label-small" x="150" y="705">INBOUND:</text>
+                <text class="label-small" x="150" y="725">• Port 443 from EKS Node SG</text>
+                <text class="label-small" x="150" y="745">• All traffic from itself</text>
+                
+                <!-- Security Flow -->
+                <rect x="650" y="610" width="450" height="180" fill="#f5f5f5" stroke="#9e9e9e" stroke-width="2" rx="6" />
+                <text class="label" x="670" y="640">🔐 IAM Roles & Permissions:</text>
+                <text class="label-small" x="690" y="665">1. EKS Node IAM Role</text>
+                <text class="label-small" x="710" y="685">   • AmazonEKSWorkerNodePolicy</text>
+                <text class="label-small" x="710" y="705">   • AmazonEKS_CNI_Policy</text>
+                <text class="label-small" x="710" y="725">   • AmazonEC2ContainerRegistryReadOnly</text>
+                
+                <text class="label-small" x="690" y="750">2. AWS Load Balancer Controller Role</text>
+                <text class="label-small" x="710" y="770">   • Custom policy for ALB management</text>
+                
+                <!-- Best Practices -->
+                <rect x="100" y="830" width="1000" height="130" fill="#fff3cd" stroke="#ffc107" stroke-width="2" rx="6" />
+                <text class="label" x="120" y="860">⚠️ Security Recommendations:</text>
+                <text class="label-small" x="140" y="885">1. RDS Security Group should allow port 5432 ONLY from EKS Node Security Group (not 0.0.0.0/0)</text>
+                <text class="label-small" x="140" y="905">2. Enable VPC Flow Logs for network traffic monitoring</text>
+                <text class="label-small" x="140" y="925">3. Consider using AWS WAF with ALB for application-layer protection</text>
+                <text class="label-small" x="140" y="945">4. Enable GuardDuty for threat detection</text>
+            </svg>
+        </div>
+        
+        <!-- Data Flow Diagram -->
+        <div id="dataflow" class="diagram-container">
+            <svg viewBox="0 0 1100 1100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <marker id="flow-arrow" markerWidth="12" markerHeight="12" refX="11" refY="3" orient="auto">
+                        <polygon points="0 0, 12 3, 0 6" fill="#e74c3c" />
+                    </marker>
+                </defs>
+                
+                <text class="title" x="380" y="30">🔄 Complete Data Flow Diagram</text>
+                
+                <!-- Step 1: User Request -->
+                <rect x="420" y="60" width="220" height="60" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="460" y="90">1️⃣ User Request</text>
+                <text class="label-small" fill="white" x="430" y="110">HTTPS://eks.eva-tee.com</text>
+                
+                <!-- Step 2: DNS Resolution -->
+                <rect x="420" y="160" width="220" height="60" fill="#9b59b6" stroke="#8e44ad" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="460" y="185">2️⃣ DNS Resolution</text>
+                <text class="label-small" fill="white" x="440" y="205">Route 53 / DNS → ALB</text>
+                
+                <!-- Step 3: ALB Receives -->
+                <rect x="420" y="260" width="220" height="80" fill="#e74c3c" stroke="#c0392b" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="450" y="290">3️⃣ ALB Processing</text>
+                <text class="label-small" fill="white" x="435" y="310">SSL Termination (443→80)</text>
+                <text class="label-small" fill="white" x="435" y="330">Health Check: /login</text>
+                
+                <!-- Step 4: Service Discovery -->
+                <rect x="100" y="380" width="220" height="70" fill="#16a085" stroke="#138d75" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="130" y="410">4️⃣ K8s Service</text>
+                <text class="label-small" fill="white" x="115" y="430">ClusterIP: student-portal</text>
+                <text class="label-small" fill="white" x="115" y="445">Port: 8080 → 8000</text>
+                
+                <!-- Step 5: Pod Selection -->
+                <rect x="740" y="380" width="220" height="70" fill="#f39c12" stroke="#d68910" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="770" y="410">5️⃣ Load Balance</text>
+                <text class="label-small" fill="white" x="755" y="430">Select Pod (1 of 3)</text>
+                <text class="label-small" fill="white" x="755" y="445">Label: app=student-portal</text>
+                
+                <!-- Step 6: Pod Processing -->
+                <rect x="420" y="490" width="220" height="80" fill="#27ae60" stroke="#229954" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="460" y="520">6️⃣ Flask App</text>
+                <text class="label-small" fill="white" x="435" y="540">Container Port: 8000</text>
+                <text class="label-small" fill="white" x="435" y="560">Retrieve DB_LINK secret</text>
+                
+                <!-- Step 7: Database Query -->
+                <rect x="100" y="610" width="220" height="80" fill="#8e44ad" stroke="#7d3c98" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="135" y="640">7️⃣ Database Query</text>
+                <text class="label-small" fill="white" x="115" y="660">PostgreSQL RDS</text>
+                <text class="label-small" fill="white" x="115" y="680">Port: 5432 (encrypted)</text>
+                
+                <!-- Step 8: Secret Management -->
+                <rect x="740" y="610" width="220" height="80" fill="#c0392b" stroke="#a93226" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="770" y="640">8️⃣ Secrets Manager</text>
+                <text class="label-small" fill="white" x="755" y="660">KMS Encrypted Secret</text>
+                <text class="label-small" fill="white" x="755" y="680">Injected as K8s Secret</text>
+                
+                <!-- Step 9: Response Path -->
+                <rect x="420" y="730" width="220" height="60" fill="#2ecc71" stroke="#27ae60" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="460" y="760">9️⃣ Response Path</text>
+                <text class="label-small" fill="white" x="435" y="780">Pod → Service → ALB</text>
+                
+                <!-- Step 10: User Receives -->
+                <rect x="420" y="830" width="220" height="60" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="6" />
+                <text class="label" fill="white" x="450" y="860">🔟 User Receives</text>
+                <text class="label-small" fill="white" x="450" y="880">HTTPS Response</text>
+                
+                <!-- Arrows showing flow -->
+                <path d="M 530 120 L 530 160" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 530 220 L 530 260" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 420 310 L 250 380" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 640 310 L 810 380" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 530 340 L 530 490" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 420 540 L 250 610" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 640 540 L 810 610" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 530 570 L 530 730" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                <path d="M 530 790 L 530 830" stroke="#e74c3c" stroke-width="3" fill="none" marker-end="url(#flow-arrow)" />
+                
+                <!-- Additional Info Boxes -->
+                <rect x="50" y="930" width="480" height="130" fill="#ecf0f1" stroke="#95a5a6" stroke-width="2" rx="6" />
+                <text class="label" x="70" y="960">📊 Traffic Statistics:</text>
+                <text class="label-small" x="90" y="985">• ALB Health Checks: Every 15 seconds to /login</text>
+                <text class="label-small" x="90" y="1005">• Pod Replicas: 3 (distributed across AZs)</text>
+                <text class="label-small" x="90" y="1025">• DB Connection Pooling: Handled by Flask app</text>
+                <text class="label-small" x="90" y="1045">• TLS Version: 1.2+ (ELBSecurityPolicy-TLS-1-2-2017-01)</text>
+                
+                <rect x="570" y="930" width="480" height="130" fill="#ecf0f1" stroke="#95a5a6" stroke-width="2" rx="6" />
+                <text class="label" x="590" y="960">🔐 Security Layers:</text>
+                <text class="label-small" x="610" y="985">• Layer 7: HTTPS/SSL at ALB (ACM Certificate)</text>
+                <text class="label-small" x="610" y="1005">• Layer 4: Security Groups (Network ACLs)</text>
+                <text class="label-small" x="610" y="1025">• Layer 3: VPC Isolation (Private Subnets)</text>
+                <text class="label-small" x="610" y="1045">• Data: KMS encryption for RDS & Secrets at rest</text>
+            </svg>
+        </div>
+    </div>
+    
+    <script>
+        function showDiagram(diagramId) {
+            // Hide all diagrams
+            document.querySelectorAll('.diagram-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected diagram
+            document.getElementById(diagramId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
