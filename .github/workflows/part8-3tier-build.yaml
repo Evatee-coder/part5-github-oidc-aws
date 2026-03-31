@@ -13,7 +13,7 @@ on:
     branches:
       - main
     paths:
-      - 'part7/**'
+      - 'Part7/**'
 
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ env:
   AWS_REGION: us-east-1
   frontend_repo: devopsdojo-frontend
   IMAGE_TAG: ${{ github.sha }}
-  PATH_TO_BUILD: ./part7
+  PATH_TO_BUILD: ./Part7
 
 jobs:
   backend:
