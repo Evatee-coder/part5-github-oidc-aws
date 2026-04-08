@@ -1,6 +1,7 @@
 
 resource "aws_ecr_repository" "frontend" {
     name = "${var.app_name}-frontend"
+    force_delete = true    # ✅ allows deletion even if images exist
     image_tag_mutability = "MUTABLE"
 
     tags = {
@@ -10,6 +11,7 @@ resource "aws_ecr_repository" "frontend" {
 
 resource "aws_ecr_repository" "backend" {
     name = "${var.app_name}-backend"
+    force_delete = true    # ✅ allows deletion even if images exist
     image_tag_mutability = "MUTABLE"
 
     tags = {
