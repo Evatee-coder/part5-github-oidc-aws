@@ -33,16 +33,16 @@ spec:
               cpu: "500m"
               memory: "512Mi"
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: react-app-svc
-  namespace: app
-spec:
-  selector:
-    app: react-app
-  ports:
-    - protocol: TCP
-      port: 3000
-      targetPort: 3000
-  type: ClusterIP
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: react-app-svc
+#   namespace: app
+# spec:
+#   selector:
+#     app: react-app
+#   ports:
+#     - protocol: TCP
+#       port: 3000
+#       targetPort: 3000
+#   type: ClusterIP
