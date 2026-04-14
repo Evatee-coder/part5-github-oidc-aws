@@ -6,13 +6,13 @@ on:
   #   branches:
   #     - main
   #   paths:
-  #     - 'eks-proper-infra/**'
+  #     - 'EKS-proper-infra/**'
   workflow_dispatch:
 
 env:
   TF_VERSION: 1.8.1
   AWS_REGION: us-east-1
-  infra_path: eks-proper-infra    # ✅ added missing infra_path variable
+  infra_path: EKS-proper-infra    # ✅ added missing infra_path variable
 
 jobs:
   dev-check:                      # ✅ properly indented
