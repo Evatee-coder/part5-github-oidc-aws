@@ -4,7 +4,7 @@ module "eks" {
   version = "~> 21.5.0"
 
   #name               = "eks-cluster-part5-3rdjan" #"${var.project}-${var.environment}-ekspart5"
-  name               = "${var.environment}-${var.prefix}-ekscluster"
+  name               = "${var.environment}-${var.prefix}-${var.eks_cluster_name}"
   kubernetes_version = "1.31"
 
   addons = {

@@ -1,3 +1,6 @@
+
+
+
 # IAM role and policy for AWS Load Balancer Controller 
 
 # Helm Chart deployment for AWS Load Balancer Controller
@@ -12,7 +15,7 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   set {
     name  = "clusterName"
-    value = module.eks.cluster_name
+    value = "${var.environment}-${var.prefix}-ekscluster"
   }
 
   set {
@@ -37,15 +40,15 @@ resource "helm_release" "aws_load_balancer_controller" {
 
   set {
     name  = "vpcId"
-    value = module.vpc.vpc_id
+    value = var.vpc_id
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.aws_load_balancer_controller,
-    module.eks
+    aws_iam_role_policy_attachment.aws_load_balancer_controller
   ]
 }
 
 # Service account for AWS Load Balancer Controller
 
-# OIDC
+
+# Helm provider moved to providers.tf to avoid duplication
