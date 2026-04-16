@@ -24,3 +24,10 @@ resource "aws_iam_role_policy" "github_actions_s3_state" {
     ]
   })
 }
+
+
+# ✅ Attach AdministratorAccess to GitHub Actions role
+resource "aws_iam_role_policy_attachment" "github_actions_admin" {
+  role       = "eks-github-actions-build-role"
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
