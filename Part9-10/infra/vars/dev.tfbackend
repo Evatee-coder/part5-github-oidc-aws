@@ -1,4 +1,4 @@
-bucket  = "state-bucket-879381241087"
-key     = "eksbootcampdc25/dev/class11-12/terraform.tfstate"
-region  = "ap-south-1"
+bucket  = "state-bucket-216989097838"
+key     = "eksBootieDec25/dev/Part9-10/terraform.tfstate"
+region  = "us-east-1"
 encrypt = true

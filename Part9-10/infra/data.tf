@@ -15,6 +15,11 @@ data "aws_iam_openid_connect_provider" "eks" {
   url = data.aws_eks_cluster.eks.identity[0].oidc[0].issuer
 }
 
+
+
+
+
+
 # output "oidc_arn" {
 #   value = data.aws_iam_openid_connect_provider.eks.arn
 
