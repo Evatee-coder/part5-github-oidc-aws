@@ -25,13 +25,13 @@ module "vpc" {
 
   # The tags below will allow kubernetes cluster to find those public subnets to create those load balancer 
   public_subnet_tags = {
-    "kubernetes.io/cluster/eks-cluster-part5-3rdjan" = "shared"
-    "kubernetes.io/role/elb"                         = "1"
+    "kubernetes.io/cluster/${var.environment}-${var.prefix}-${var.eks_cluster_name}" = "shared"
+    "kubernetes.io/role/elb"    = "1"
   }
 
   # Required tags for EKS cluster subnet discovery
   private_subnet_tags = {
-    "kubernetes.io/cluster/eks-cluster-part5-3rdjan" = "shared"
+    "kubernetes.io/cluster/${var.environment}-${var.prefix}-${var.eks_cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"                = "1"
   }
 
