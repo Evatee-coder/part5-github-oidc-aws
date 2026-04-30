@@ -164,7 +164,7 @@
 #               revision   = 1
 #               datasource = "Prometheus"
 #             }
-        
+
 #           }
 #         }
 

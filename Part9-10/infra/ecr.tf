@@ -3,7 +3,7 @@ resource "aws_ecr_repository" "images" {
   for_each = local.services
 
   name                 = "${var.environment}-${var.app_name}-${each.key}"
-  force_delete         = true    # ✅ add this line
+  force_delete         = true # ✅ add this line
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
