@@ -9,12 +9,15 @@ module "vpc" {
   private_subnets = [var.subnet_cidrs["private_subnets"][0], var.subnet_cidrs["private_subnets"][1], var.subnet_cidrs["private_subnets"][2]]
   public_subnets  = [var.subnet_cidrs["public_subnets"][0], var.subnet_cidrs["public_subnets"][1], var.subnet_cidrs["public_subnets"][2]]
 
+  # Yes, EKS nodes generally need a NAT gateway (or a public IP and an Internet Gateway) to 
+  # join and operate within a private subnet
+  # we also need NAT to allow pods get image(private or public) from internet
   enable_nat_gateway = true
   single_nat_gateway = true
 
   tags = {
     Terraform   = "true"
-    Environment = var.environment 
+    Environment = var.environment
     repo        = "part5-github-oidc-aws"
   }
 
@@ -26,13 +29,13 @@ module "vpc" {
   # The tags below will allow kubernetes cluster to find those public subnets to create those load balancer 
   public_subnet_tags = {
     "kubernetes.io/cluster/${var.environment}-${var.prefix}-${var.eks_cluster_name}" = "shared"
-    "kubernetes.io/role/elb"    = "1"
+    "kubernetes.io/role/elb"                                                         = "1"
   }
 
   # Required tags for EKS cluster subnet discovery
   private_subnet_tags = {
     "kubernetes.io/cluster/${var.environment}-${var.prefix}-${var.eks_cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"                = "1"
+    "kubernetes.io/role/internal-elb"                                                = "1"
   }
 
 }
