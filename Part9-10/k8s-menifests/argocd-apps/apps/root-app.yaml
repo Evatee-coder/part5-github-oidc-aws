@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Evatee-coder/part5-github-oidc-aws.git
-    targetRevision: prod
+    targetRevision: main
     # targetRevision: main --- IGNORE ---
     path: Part9-10/k8s-menifests/argocd-apps
     directory:
