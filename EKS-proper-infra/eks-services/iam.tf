@@ -176,8 +176,10 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
         Action = [
           "elasticloadbalancing:CreateListener",
           "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyListener",
           "elasticloadbalancing:CreateRule",
-          "elasticloadbalancing:DeleteRule"
+          "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:ModifyRule"
         ]
         Resource = "*"
       },
