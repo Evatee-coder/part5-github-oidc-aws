@@ -6,7 +6,7 @@ data "aws_route53_zone" "public" {
 # # need acm cert on subdomain
 # # need to validate the cert (create on record for acm cert )
 
-
+# e.g frontend.dev.craftica.eva-tee.com
 resource "aws_acm_certificate" "cert" {
   domain_name       = "*.${var.environment}.${var.app_name}.${data.aws_route53_zone.public.name}"
   validation_method = "DNS"
