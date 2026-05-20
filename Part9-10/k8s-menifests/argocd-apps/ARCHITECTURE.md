@@ -1,4 +1,4 @@
-# ArgoCD App of Apps Architecture Diagram
+# ArgoCD App of Apps Architecture Diagrams
 
 ## High-Level Architecture
 
