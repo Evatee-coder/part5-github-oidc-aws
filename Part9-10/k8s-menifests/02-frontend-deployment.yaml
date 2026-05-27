@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-frontend:abd775d0bdad2072010aa43df36b7863dd164cb9
+        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-frontend:47b4814d5bdbdfdb8e59c55b83804e1f112ceaca
         ports:
         - containerPort: 3000
           name: http
