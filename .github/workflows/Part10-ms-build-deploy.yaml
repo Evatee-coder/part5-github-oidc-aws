@@ -31,7 +31,7 @@ jobs:
           - name: voting
             ecr_repo: prod-craftica-voting
           - name: recommendation
-            ecr_repo: prod-craftica-recommendation
+            ecr_repo: prod-craftica-recco
 
     steps:
       - name: Checkout code
@@ -89,7 +89,7 @@ jobs:
             ecr_repo: prod-craftica-voting
           - name: recommendation
             menifest: 05-recommendation-deployment.yaml
-            ecr_repo: prod-craftica-recommendation
+            ecr_repo: prod-craftica-recco
 
     steps:
       - name: Checkout code
@@ -104,7 +104,7 @@ jobs:
         run: |
 
           # Update the image in the deployment file
-          sed -i "s|image:.*${{ matrix.service.name }}.*|image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}|g" \
+          sed -i "s|image:.*${{ matrix.service.ecr_repo }}.*|image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}|g" \
             ./${{ env.menifest_path }}/${{ matrix.service.menifest }}
 
           echo "Updated ${{ matrix.service.menifest }} with new image tag -> ${{ github.sha }}"
