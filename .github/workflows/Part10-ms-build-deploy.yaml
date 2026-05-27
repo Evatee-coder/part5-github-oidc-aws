@@ -64,63 +64,62 @@ jobs:
           cache-to: type=gha,mode=max
 
 
-#   argo-deploy:
-#     needs: build-and-push
-#     runs-on: ubuntu-latest
-#     permissions:
-#       id-token: write
-#       contents: write
+  argo-deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
 
-#     env:
-#       menifest_path: Part9-10/k8s-menifests
+    env:
+      menifest_path: Part9-10/k8s-menifests
 
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         service:
-#           - name: frontend
-#             menifest: 02-frontend-deployment.yaml
-#             ecr_repo: prod-craftica-frontend
-#           - name: catalogue
-#             menifest: 03-catalogue-deployment.yaml
-#             ecr_repo: prod-craftica-catalogue
-#           - name: voting
-#             menifest: 04-voting-deployment.yaml
-#             ecr_repo: prod-craftica-voting
-#           - name: recommendation
-#             menifest: 05-recommendation-deployment.yaml
-#             ecr_repo: prod-craftica-recco
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: frontend
+            menifest: 02-frontend-deployment.yaml
+            ecr_repo: prod-craftica-frontend
+          - name: catalogue
+            menifest: 03-catalogue-deployment.yaml
+            ecr_repo: prod-craftica-catalogue
+          - name: voting
+            menifest: 04-voting-deployment.yaml
+            ecr_repo: prod-craftica-voting
+          - name: recommendation
+            menifest: 05-recommendation-deployment.yaml
+            ecr_repo: prod-craftica-recco
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-#         with:
-#           # repository: akhileshmishrabiz/k8s-bootcamp-dec25
-#           ref: prod
-#           # token: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # repository: akhileshmishrabiz/k8s-bootcamp-dec25
+          ref: prod
+          # token: ${{ secrets.GITHUB_TOKEN }}
 
 
-#       - name: Update Kubernetes deployment manifest
-#         run: |
+      - name: Update Kubernetes deployment manifest
+        run: |
 
-#           # Update the image in the deployment file
-#           sed -i "s|image:.*${{ matrix.service.name }}.*|image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}|g" \
-#             ./${{ env.menifest_path }}/${{ matrix.service.menifest }}
+          # Update the image in the deployment file
+          sed -i "s|image:.*${{ matrix.service.name }}.*|image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}|g" \
+            ./${{ env.menifest_path }}/${{ matrix.service.menifest }}
 
-#           echo "Updated ${{ matrix.service.menifest }} with new image tag -> ${{ github.sha }}"
-#           echo "Image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}"
+          echo "Updated ${{ matrix.service.menifest }} with new image tag -> ${{ github.sha }}"
+          echo "Image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}"
+      - name: Commit and push updated manifests
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${{ env.menifest_path }}/*.yaml
+          git diff --staged --quiet || git commit -m "Update ${{ matrix.service.name }} image to ${{ github.sha }} tag"
+          git pull --rebase origin ${{ env.environment_branch }}
+          git push --force origin ${{ env.environment_branch }}
 
-#       - name: Commit and push updated manifests
-#         run: |
-#           git config --global user.name "github-actions[bot]"
-#           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-#           git add ${{ env.menifest_path }}/*.yaml
-#           git diff --staged --quiet || git commit -m "Update ${{ matrix.service.name }} image to ${{ github.sha }} tag"
-#           git pull --rebase origin ${{ env.environment_branch }}
-#           git push --force origin ${{ env.environment_branch }}
-
-#       - name: Summary
-#         run: |
-#           echo " Built and pushed ${{ matrix.service.name }}" >> $GITHUB_STEP_SUMMARY
-#           echo "Image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-#           echo "Updated deployment manifest with new image" >> $GITHUB_STEP_SUMMARY
+      - name: Summary
+        run: |
+          echo " Built and pushed ${{ matrix.service.name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Image: ${{ env.ECR_REGISTRY }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "Updated deployment manifest with new image" >> $GITHUB_STEP_SUMMARY
