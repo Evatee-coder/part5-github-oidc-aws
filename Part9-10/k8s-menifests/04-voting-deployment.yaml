@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
       - name: voting
-        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-voting:47b4814d5bdbdfdb8e59c55b83804e1f112ceaca
+        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-voting:8d673e1e54abce65d0fa3b901ea7bf1603b54b58
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
