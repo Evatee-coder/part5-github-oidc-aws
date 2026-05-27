@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: recommendation
+  name: recco
   namespace: craftica
   labels:
-    app: recommendation
+    app: recco
     tier: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: recommendation
+      app: recco
   template:
     metadata:
       labels:
-        app: recommendation
+        app: recco
         tier: backend
     spec:
       containers:
-      - name: recommendation
-        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-recommendation:latest
+      - name: recco
+        image: 216989097838.dkr.ecr.us-east-1.amazonaws.com/prod-craftica-recco:6c667c5775a7664388228b9f46a75047abfdfef9
         ports:
         - containerPort: 8080
           name: http

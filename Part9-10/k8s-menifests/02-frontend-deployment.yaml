@@ -27,7 +27,7 @@ spec:
         - name: CATALOGUE_URL
           value: "http://catalogue:5000"
         - name: RECOMMENDATION_URL
-          value: "http://recommendation:8080"
+          value: "http://recco:8080"
         - name: VOTING_URL
           value: "http://voting:8080"
         resources:

@@ -19,10 +19,10 @@ locals {
       host        = "voting.${var.environment}.${var.app_name}.${var.domain}"
     },
     {
-      name        = "recommendation"
+      name        = "recco"
       port        = "8080"
       target_port = "8080"
-      host        = "recommendation.${var.environment}.${var.app_name}.${var.domain}"
+      host        = "recco.${var.environment}.${var.app_name}.${var.domain}"
     },
   ]
 
