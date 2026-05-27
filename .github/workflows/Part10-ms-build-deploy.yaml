@@ -31,7 +31,7 @@ jobs:
           - name: voting
             ecr_repo: prod-craftica-voting
           - name: recommendation
-            ecr_repo: prod-craftica-recco
+            ecr_repo: prod-craftica-recommendation
 
     steps:
       - name: Checkout code
@@ -89,7 +89,7 @@ jobs:
             ecr_repo: prod-craftica-voting
           - name: recommendation
             menifest: 05-recommendation-deployment.yaml
-            ecr_repo: prod-craftica-recco
+            ecr_repo: prod-craftica-recommendation
 
     steps:
       - name: Checkout code
