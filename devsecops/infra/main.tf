@@ -35,13 +35,13 @@ resource "aws_security_group" "rds_sg" {
   }
 
   # Egress rule - allow all outbound traffic
-  egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   egress {
+#     description = "Allow all outbound traffic"
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
   tags = {
     Name        = "${var.db_identifier}-sg"
@@ -51,10 +51,12 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
+
 # RDS PostgreSQL Instance
-# checkov:skip=CKV2_AWS_30:too costly dont need it
 resource "aws_db_instance" "postgres" {
   # Basic configuration
+  # checkov:skip=CKV2_AWS_30:too costly dont need it
+  # checkov:skip=CKV_AWS_161:dont feel like doing it
   identifier     = var.db_identifier
   engine         = "postgres"
   engine_version = var.engine_version

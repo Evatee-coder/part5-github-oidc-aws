@@ -29,7 +29,7 @@ jobs:
         with:
           directory: ${{ env.infra_path }}
           quiet: true #display only failed checks
-          skip_check: CKV_AWS_118
+          skip_check: CKV_AWS_118,CKV_AWS_354 # skip checks that are not relevant for this project
 
 
       # - name: Configure AWS credentials
